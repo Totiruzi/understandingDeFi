@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import { Test, consol2 } from "forge-std/Test.sol";
+import { Test, console2 } from "forge-std/Test.sol";
 import { TSwapPool } from "../../src/TSwapPool.sol";
 import { ERC20Mock } from "../mocks/ERC20Mock.sol";
 
@@ -32,9 +32,11 @@ contract Handler is Test {
     }
 
     function swapPoolTokenForWethBasedOnOutputWeth(uint256 outputWeth) public {
-        outputWeth = bound(outputWeth, 0, type(uint64).max);
+        uint256 minWeth = pool.getMinimumWethDepositAmount();
+        uint256 maxWeth = weth.balanceOf(address(pool));
+        outputWeth = bound(outputWeth, minWeth, maxWeth);
 
-        if (outputWeth >= weth.balanceOf(poll)) {
+        if (outputWeth >= weth.balanceOf(address(pool))) {
             return;
         }
 
@@ -52,10 +54,10 @@ contract Handler is Test {
         }
 
         // wethAmount = bound(wethAmount, 0, type(uint64).max);
-        startingY = int256(weth.balanceOf(address(this)));
-        startingX = int256(poolToken.balanceOf(address(this)));
+        startingY = int256(weth.balanceOf(address(pool)));
+        startingX = int256(poolToken.balanceOf(address(pool)));
         expectedDeltaY = int256(-1) * int256(outputWeth); // When loosing weth, expected delta Y will be negative
-        expectedDeltaX = int256(pool.getPoolTokensToDepositBasedOnWeth(poolTokenAmount));
+        expectedDeltaX = int256(poolTokenAmount);
 
         if (poolToken.balanceOf(swapper) < poolTokenAmount) {
             poolToken.mint(swapper, poolTokenAmount - poolToken.balanceOf(swapper) + 1);
@@ -67,8 +69,8 @@ contract Handler is Test {
             pool.swapExactOutput(poolToken, weth, outputWeth, uint64(block.timestamp));
         vm.stopPrank();
 
-        uint256 endingX = poolToken.balanceOf(address(this));
-        uint256 endingY = weth.balanceOf(address(this));
+        uint256 endingX = poolToken.balanceOf(address(pool));
+        uint256 endingY = weth.balanceOf(address(pool));
 
         // the expected result of swapping weth for poolToken
         // ∆y = (α/(1+α)) * y
@@ -81,14 +83,15 @@ contract Handler is Test {
     function deposit(uint256 wethAmount) public {
         // It should be a reasonable amount, also try to avoid overflow error by using uint64 max
         // (18.446744073709551615) as a bound
-        wethAmount = bound(wethAmount, 0, type(uint64).max);
-        startingY = int256(weth.balanceOf(address(this)));
-        startingX = int256(poolToken.balanceOf(address(this)));
+        uint256 minWeth = pool.getMinimumWethDepositAmount();
+        wethAmount = bound(wethAmount, minWeth, type(uint64).max);
+        startingY = int256(weth.balanceOf(address(pool)));
+        startingX = int256(poolToken.balanceOf(address(pool)));
         expectedDeltaY = int256(wethAmount);
         expectedDeltaX = int256(pool.getPoolTokensToDepositBasedOnWeth(wethAmount));
 
         // deposit the token
-        vm.prank(liquidityProvider);
+        vm.startPrank(liquidityProvider);
         weth.mint(liquidityProvider, wethAmount);
         poolToken.mint(liquidityProvider, uint256(expectedDeltaX));
         weth.approve(address(pool), type(uint256).max);
@@ -98,8 +101,8 @@ contract Handler is Test {
 
         // check if the deposited is the same as expected ration
         // the actual amounts of lp and weth in the pool
-        uint2566 endingX = poolToken.balanceOf(address(this));
-        uint2566 endingY = weth.balanceOf(address(this));
+        uint256 endingX = poolToken.balanceOf(address(pool));
+        uint256 endingY = weth.balanceOf(address(pool));
 
         // the expected result of swapping weth for poolToken
         // ∆y = (α/(1+α)) * y
