@@ -84,7 +84,8 @@ contract Handler is Test {
         // It should be a reasonable amount, also try to avoid overflow error by using uint64 max
         // (18.446744073709551615) as a bound
         uint256 minWeth = pool.getMinimumWethDepositAmount();
-        wethAmount = bound(wethAmount, minWeth, type(uint64).max);
+        uint256 maxWeth = weth.balanceOf(address(pool));
+        wethAmount = bound(wethAmount, minWeth, maxWeth);
         startingY = int256(weth.balanceOf(address(pool)));
         startingX = int256(poolToken.balanceOf(address(pool)));
         expectedDeltaY = int256(wethAmount);

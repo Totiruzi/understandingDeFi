@@ -31,7 +31,7 @@ contract Invariant is StdInvariant, Test {
         factory = new PoolFactory(address(weth));
 
         // create the pool it's self.
-        pool = TSwapPool(factory.createPool(address(weth)));
+        pool = TSwapPool(factory.createPool(address(poolToken)));
 
         // establish the existing ration for swap
         poolToken.mint(address(this), (uint256(STARTING_X)));
@@ -47,7 +47,7 @@ contract Invariant is StdInvariant, Test {
         handler = new Handler(pool);
         bytes4[] memory selectors = new bytes4[](2);
         selectors[0] = handler.deposit.selector;
-        selectors[0] = handler.swapPoolTokenForWethBasedOnOutputWeth.selector;
+        selectors[1] = handler.swapPoolTokenForWethBasedOnOutputWeth.selector;
 
         targetSelector(
             FuzzSelector({addr: address(handler), selectors: selectors})
@@ -57,7 +57,7 @@ contract Invariant is StdInvariant, Test {
 
     function statefulFuzz_constantProductFormulaStaysTheSame() public {
         // assert() // ??????
-        // The change in the size of the pool size ratio weth should follow this function:
+        // The change in the size of the pool ratio with weth should follow this function:
         // ∆x = (β/(1-β)) * x
         // In a handler
         // actual delta

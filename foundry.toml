@@ -11,7 +11,7 @@ depth = 32
 fail_on_revert = true
 
 [fuzz]
-seed = "0x1"
+seed = "0x6"
 
 [fmt]
 bracket_spacing = true
