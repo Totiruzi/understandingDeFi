@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.20;
 
-import { Test } from "forge-std/Test.sol";
+import { Test, console2 } from "forge-std/Test.sol";
 import { StdInvariant } from "forge-std/StdInvariant.sol";
 import { ERC20Mock } from "../mocks/ERC20Mock.sol";
 import { PoolFactory } from "../../src/PoolFactory.sol";
@@ -29,6 +29,17 @@ contract Invariant is StdInvariant, Test {
 
         // Create the pool contract
         factory = new PoolFactory(address(weth));
+
+        console2.log("=== Before Pool Creation ===");
+        console2.log("Weth address: ");
+        console2.logAddress(address(weth));
+        console2.log("Weth balance: ");
+        console2.logUint(weth.balanceOf(address(this)));
+
+        console2.log("TokenPool address: ");
+        console2.logAddress(address(poolToken));
+        console2.log("PoolToken balance of this:");
+        console2.log(poolToken.balanceOf(address(this)));
 
         // create the pool it's self.
         pool = TSwapPool(factory.createPool(address(poolToken)));
