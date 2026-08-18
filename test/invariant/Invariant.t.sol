@@ -44,6 +44,18 @@ contract Invariant is StdInvariant, Test {
         // create the pool it's self.
         pool = TSwapPool(factory.createPool(address(poolToken)));
 
+        console2.log("=== AFTER POOL CREATION ===");
+        console2.log("Pool's WETH address:");
+        console2.logAddress(pool.getWeth());
+        console2.log("Pool's PoolToken address:");
+        console2.logAddress(pool.getPoolToken());
+        console2.log("Are they the same?");
+        console2.logBool(address(pool.getWeth()) == address(pool.getPoolToken()));
+        console2.log("WETH balance in pool:");
+        console2.logUint(weth.balanceOf(address(pool)));
+        console2.log("PoolToken balance in pool:");
+        console2.logUint(poolToken.balanceOf(address(pool)));
+
         // establish the existing ration for swap
         poolToken.mint(address(this), (uint256(STARTING_X)));
         weth.mint(address(this), (uint256(STARTING_Y)));
