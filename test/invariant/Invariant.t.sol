@@ -78,7 +78,7 @@ contract Invariant is StdInvariant, Test {
         targetContract(address(handler));
     }
 
-    function statefulFuzz_constantProductFormulaStaysTheSame() public {
+    function statefulFuzz_constantProductFormulaStaysTheSame() public view {
         // assert() // ??????
         // The change in the size of the pool ratio with weth should follow this function:
         // ∆x = (β/(1-β)) * x
