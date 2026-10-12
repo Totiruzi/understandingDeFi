@@ -36,6 +36,8 @@ contract TSwapPool is ERC20 {
     IERC20 private immutable i_wethToken;
     IERC20 private immutable i_poolToken;
     uint256 private constant MINIMUM_WETH_LIQUIDITY = 1_000_000_000;
+    // @antennal *uint256 private swap_count = 0; uint256 private constant SWAP_COUNT_MAX = 10;
+    // check where these variables where used
     uint256 private swap_count = 0;
     uint256 private constant SWAP_COUNT_MAX = 10;
 
